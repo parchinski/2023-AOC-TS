@@ -46,52 +46,64 @@ function getValueFromRangeMap(rangeMap: RangeMap, key: number): number {
   return key; // default case if not found in ranges
 }
 
-const getFinalLocations = (seeds: number[]): number[] => {
-  const finalLocations: number[] = [];
+// modified version that will only store the lowest final location
+const getFinalLocations = (seedRanges: [number, number][]): number | null => {
+  let smallestFinalLocation = Infinity;
 
-  seeds.forEach((seed) => {
-    console.log(`Current seed is: ${seed}`);
+  seedRanges.forEach(([start, end]) => {
+    for (let seed = start; seed <= end; seed++) {
+      const soilNumber = getValueFromRangeMap(maps["seed-to-soil"], seed);
+      const fertilizerNumber = getValueFromRangeMap(
+        maps["soil-to-fertilizer"],
+        soilNumber
+      );
+      const waterNumber = getValueFromRangeMap(
+        maps["fertilizer-to-water"],
+        fertilizerNumber
+      );
+      const lightNumber = getValueFromRangeMap(
+        maps["water-to-light"],
+        waterNumber
+      );
+      const temperatureNumber = getValueFromRangeMap(
+        maps["light-to-temperature"],
+        lightNumber
+      );
+      const humidityNumber = getValueFromRangeMap(
+        maps["temperature-to-humidity"],
+        temperatureNumber
+      );
+      const locationNumber = getValueFromRangeMap(
+        maps["humidity-to-location"],
+        humidityNumber
+      );
 
-    const soilNumber: number = getValueFromRangeMap(maps["seed-to-soil"], seed);
-    console.log(`soilNumber is: ${soilNumber}`);
-
-    const fertilizerNumber: number = getValueFromRangeMap(
-      maps["soil-to-fertilizer"],
-      soilNumber
-    );
-    console.log(`fertilizerNumber is: ${fertilizerNumber}`);
-
-    const waterNumber: number = getValueFromRangeMap(
-      maps["fertilizer-to-water"],
-      fertilizerNumber
-    );
-    console.log(`waterNumber is: ${waterNumber}`);
-
-    const lightNumber: number = getValueFromRangeMap(
-      maps["water-to-light"],
-      waterNumber
-    );
-    console.log(`lightNumber is: ${lightNumber}`);
-
-    const temperatureNumber: number = getValueFromRangeMap(
-      maps["light-to-temperature"],
-      lightNumber
-    );
-    console.log(`temperatureNumber is: ${temperatureNumber}`);
-
-    const humidityNumber: number = getValueFromRangeMap(
-      maps["temperature-to-humidity"],
-      temperatureNumber
-    );
-
-    const locationNumber: number = getValueFromRangeMap(
-      maps["humidity-to-location"],
-      humidityNumber
-    );
-    finalLocations.push(locationNumber);
+      // Update the smallestFinalLocation if the current locationNumber is smaller
+      if (locationNumber < smallestFinalLocation) {
+        smallestFinalLocation = locationNumber;
+      }
+    }
   });
 
-  return finalLocations;
+  return smallestFinalLocation === Infinity ? null : smallestFinalLocation;
+};
+
+const getSeeds = (seeds: string[]): [number, number][] => {
+  const finalSeedRanges: [number, number][] = [];
+
+  for (let i = 0; i < seeds.length; i += 2) {
+    const start = parseInt(seeds[i]);
+    const range = parseInt(seeds[i + 1]);
+
+    if (isNaN(start) || isNaN(range)) {
+      console.error(`Invalid seed or range: ${seeds[i]}, ${seeds[i + 1]}`);
+      continue;
+    }
+
+    finalSeedRanges.push([start, start + range - 1]);
+  }
+
+  return finalSeedRanges;
 };
 
 // MAIN LOGIC
@@ -99,7 +111,7 @@ const input: string[] = readFileSync(FILE_NAME, "utf-8")
   .split("\n")
   .filter((line) => line.trim());
 
-const seeds = input[0].split(":")[1].trim().split(" ");
+const seedRanges = getSeeds(input[0].split(":")[1].trim().split(" "));
 
 let currentMap: MapKey = "seed-to-soil";
 
@@ -123,9 +135,5 @@ for (let i = 1; i < input.length; i++) {
   }
 }
 
-const finalLocations: number[] = getFinalLocations(
-  seeds.map((seed) => parseInt(seed))
-);
-
-const smallestNumber = Math.min(...finalLocations);
-console.log(`the closest location is ${smallestNumber}`);
+const smallestFinalLocation = getFinalLocations(seedRanges);
+console.log(`the closest location is ${smallestFinalLocation}`);
