@@ -4,14 +4,17 @@ import { readFileSync } from "fs";
 // CONSTANTS
 const FILE_NAME: string = "./input.txt";
 
-// MAPS
-const seedToSoilMap: Map<number, number> = new Map();
-const soilToFertilizerMap: Map<number, number> = new Map();
-const fertilizerToWaterMap: Map<number, number> = new Map();
-const waterToLightMap: Map<number, number> = new Map();
-const lightToTemperatureMap: Map<number, number> = new Map();
-const temperatureToHumidityMap: Map<number, number> = new Map();
-const humidityToLocationMap: Map<number, number> = new Map();
+// RANGE MAP TYPE
+type RangeMap = { start: number; offset: number; length: number }[];
+
+// RANGE MAPS
+const seedToSoilMap: RangeMap = [];
+const soilToFertilizerMap: RangeMap = [];
+const fertilizerToWaterMap: RangeMap = [];
+const waterToLightMap: RangeMap = [];
+const lightToTemperatureMap: RangeMap = [];
+const temperatureToHumidityMap: RangeMap = [];
+const humidityToLocationMap: RangeMap = [];
 
 type MapKey =
   | "seed-to-soil"
@@ -22,7 +25,7 @@ type MapKey =
   | "temperature-to-humidity"
   | "humidity-to-location";
 
-const maps: Record<string, Map<number, number>> = {
+const maps: Record<string, RangeMap> = {
   "seed-to-soil": seedToSoilMap,
   "soil-to-fertilizer": soilToFertilizerMap,
   "fertilizer-to-water": fertilizerToWaterMap,
@@ -33,72 +36,56 @@ const maps: Record<string, Map<number, number>> = {
 };
 
 // FUNCTIONS
+// Function to get value based on the range map
+function getValueFromRangeMap(rangeMap: RangeMap, key: number): number {
+  for (const range of rangeMap) {
+    if (key >= range.start && key < range.start + range.length) {
+      return key + range.offset;
+    }
+  }
+  return key; // default case if not found in ranges
+}
+
 const getFinalLocations = (seeds: number[]): number[] => {
   const finalLocations: number[] = [];
 
-  seeds.map((seed) => {
-    console.log(`Current seed is: ${seed}`);
+  seeds.forEach((seed) => {
+    const soilNumber: number = getValueFromRangeMap(maps["seed-to-soil"], seed);
 
-    const soilNumber: number = getSoilNumber(seed);
-    console.log(`soilNumber is: ${soilNumber}`);
+    const fertilizerNumber: number = getValueFromRangeMap(
+      maps["soil-to-fertilizer"],
+      soilNumber
+    );
 
-    const fertilizerNumber: number = getFertilizerNumber(soilNumber);
-    console.log(`fertilizerNumber is: ${fertilizerNumber}`);
+    const waterNumber: number = getValueFromRangeMap(
+      maps["fertilizer-to-water"],
+      fertilizerNumber
+    );
 
-    const waterNumber: number = getWaterNumber(fertilizerNumber);
-    console.log(`waterNumber is: ${waterNumber}`);
+    const lightNumber: number = getValueFromRangeMap(
+      maps["water-to-light"],
+      waterNumber
+    );
 
-    const lightNumber: number = getLightNumber(waterNumber);
-    console.log(`lightNumber is: ${lightNumber}`);
+    const temperatureNumber: number = getValueFromRangeMap(
+      maps["light-to-temperature"],
+      lightNumber
+    );
 
-    const temperatureNumber: number = getTemperatureNumber(lightNumber);
-    console.log(`temperatureNumber is: ${temperatureNumber}`);
+    const humidityNumber: number = getValueFromRangeMap(
+      maps["temperature-to-humidity"],
+      temperatureNumber
+    );
 
-    const humidityNumber: number = getHumidityNumber(temperatureNumber);
-
-    const locationNumber: number = getLocationNumber(humidityNumber);
+    const locationNumber: number = getValueFromRangeMap(
+      maps["humidity-to-location"],
+      humidityNumber
+    );
     finalLocations.push(locationNumber);
   });
 
   return finalLocations;
 };
-
-// FUNCTION TO GET SOIL NUMBER
-function getSoilNumber(seed: number): number {
-  return maps["seed-to-soil"].get(seed) || seed;
-}
-
-// FUNCTION TO GET FERTILIZER NUMBER
-function getFertilizerNumber(soilNumber: number): number {
-  return maps["soil-to-fertilizer"].get(soilNumber) || soilNumber;
-}
-
-// FUNCTION TO GET WATER NUMBER
-function getWaterNumber(fertilizerNumber: number): number {
-  return maps["fertilizer-to-water"].get(fertilizerNumber) || fertilizerNumber;
-}
-
-// FUNCTION TO GET LIGHT NUMBER
-function getLightNumber(waterNumber: number): number {
-  return maps["water-to-light"].get(waterNumber) || waterNumber;
-}
-
-// FUNCTION TO GET TEMPERATURE NUMBER
-function getTemperatureNumber(lightNumber: number): number {
-  return maps["light-to-temperature"].get(lightNumber) || lightNumber;
-}
-
-// FUNCTION TO GET HUMIDITY NUMBER
-function getHumidityNumber(temperatureNumber: number): number {
-  return (
-    maps["temperature-to-humidity"].get(temperatureNumber) || temperatureNumber
-  );
-}
-
-// FUNCTION TO GET LOCATION NUMBER
-function getLocationNumber(humidityNumber: number): number {
-  return maps["humidity-to-location"].get(humidityNumber) || humidityNumber;
-}
 
 // MAIN LOGIC
 const input: string[] = readFileSync(FILE_NAME, "utf-8")
@@ -121,9 +108,11 @@ for (let i = 1; i < input.length; i++) {
       .split(" ")
       .map((num) => parseInt(num));
 
-    for (let i = 0; i < rangeLength; i++) {
-      maps[currentMap].set(sourceRangeStart + i, destinationRangeStart + i);
-    }
+    maps[currentMap].push({
+      start: sourceRangeStart,
+      offset: destinationRangeStart - sourceRangeStart,
+      length: rangeLength,
+    });
   }
 }
 
