@@ -19,7 +19,7 @@ type CombinedType = {
 };
 
 // Constants
-const FILE_NAME = "example.txt";
+const FILE_NAME = "input.txt";
 
 const RANKED_SUITS = [
   "A",
@@ -112,57 +112,51 @@ const sortBasedOnHandValues = (
     bid: bids[index],
   }));
 
-  // Sort the array based on hand values
-  combined.sort((a, b) => a.handValue - b.handValue);
-
-  for (let i = 0; i < combined.length - 1; i++) {
-    if (combined[i].handValue === combined[i + 1].handValue) {
-      let checkedOrder: boolean = false;
-      let index: number = 0;
-
-      while (!checkedOrder) {
-        if (
-          !combined[i].hand[index] ||
-          !combined[i + 1].hand[index]
-        ) {
-          checkedOrder = true;
-          console.log(
-            `Found 2 same hands: ${combined[i].hand} and ${
-              combined[i + 1].hand
-            }`
-          );
-          break;
-        }
-
-        const currentCheck = compareIndividualCards(
-          combined[i].hand[index],
-          combined[i + 1].hand[index]
-        );
-
-        if (currentCheck === -1) {
-          checkedOrder = true;
-          break;
-        } else if (currentCheck === 1) {
-          const temp = combined[i];
-          combined[i] = combined[i + 1];
-          combined[i + 1] = temp;
-          checkedOrder = true;
-          break;
-        }
-
-        index++;
-      }
+  // Group the hands by handValue
+  const groups: { [key: number]: CombinedType[] } = {};
+  combined.forEach((item) => {
+    if (!groups[item.handValue]) {
+      groups[item.handValue] = [];
     }
-  }
+    groups[item.handValue].push(item);
+  });
 
-  console.log(`Combined: ${JSON.stringify(combined)}`);
+  // Sort each group individually
+  Object.values(groups).forEach((group) => {
+    group.sort((a, b) => {
+      for (
+        let i = 0;
+        i < Math.min(a.hand.length, b.hand.length);
+        i++
+      ) {
+        const comparison = compareIndividualCards(
+          a.hand[i],
+          b.hand[i]
+        );
+        if (comparison !== 0) {
+          return comparison;
+        }
+      }
+      return a.hand.length - b.hand.length;
+    });
+  });
+
+  // Flatten the groups back into a single array
+  const sortedCombined: CombinedType[] = [];
+  Object.keys(groups)
+    .sort((a, b) => Number(a) - Number(b))
+    .forEach((key) => {
+      sortedCombined.push(...groups[Number(key)]);
+    });
 
   // Create new arrays for hands, handValues, and bids
-  const sortedHands: string[] = combined.map((item) => item.hand);
-  const sortedHandValues: number[] = combined.map(
+  const sortedHands: string[] = sortedCombined.map(
+    (item) => item.hand
+  );
+  const sortedHandValues: number[] = sortedCombined.map(
     (item) => item.handValue
   );
-  const sortedBids: number[] = combined.map((item) => item.bid);
+  const sortedBids: number[] = sortedCombined.map((item) => item.bid);
 
   return [
     sortedHands.reverse(),
@@ -212,6 +206,9 @@ const processInputArray = (input: string[]): number => {
   // check if finalSortedBids is a number array
   for (let i = 1; i <= finalSortedBids.length; i++) {
     const value = finalSortedBids[i - 1] * i;
+
+    console.log(`${finalSortedBids[i - 1]} * ${i} = ${value}`);
+
     totalWinnings += value;
   }
 
