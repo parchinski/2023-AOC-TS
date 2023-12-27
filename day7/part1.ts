@@ -19,8 +19,6 @@ type CombinedType = {
 };
 
 // Constants
-const FILE_NAME = "input.txt";
-
 const RANKED_SUITS = [
   "A",
   "K",
@@ -225,4 +223,10 @@ const readFile = (filename: string) => {
   console.log(`Answer to part 1 is: ${totalWinnings}`);
 };
 
-readFile(FILE_NAME);
+if (process.argv[2] === undefined) {
+  throw new Error("Please provide an input file");
+}
+
+const fileName = process.argv[2];
+
+readFile(fileName);
