@@ -63,12 +63,12 @@ const findBestWildcardHand = (cards: string[], jokerCount: number) => {
   const cardsWithHighestCount = Object.keys(cardCounts).filter(
     (key) => cardCounts[key] === highestCardCount,
   );
-  console.log(`Cards with highest count: ${cardsWithHighestCount}`);
+  console.log(`Card(s) with highest count: ${cardsWithHighestCount}`);
 
   // Full house from 2 pair scenario
   if (cardsWithHighestCount.length === 2 && jokerCount === 1) {
     bestHand.push(cardsWithHighestCount[0]);
-    console.log(`Full house from 2 pair scenario: ${bestHand}`);
+    console.log(`Best hand: ${bestHand}`);
     return bestHand;
   }
 
@@ -76,7 +76,7 @@ const findBestWildcardHand = (cards: string[], jokerCount: number) => {
     for (let i = 0; i < jokerCount; i++) {
       bestHand.push(cardsWithHighestCount[0]);
     }
-    console.log(`best hand: ${bestHand}`);
+    console.log(`Best hand: ${bestHand}`);
     return bestHand;
   }
 
@@ -203,7 +203,6 @@ const collectData = (filename: string) => {
 
     return 0;
   });
-  console.log(`Hands sorted by rank and card: ${handsSortedByRankAndCard}`);
 
   // Calulate the total winnings based on rules
   const totalWinnings = calculateWinnings(handsSortedByRankAndCard);
