@@ -14,34 +14,33 @@ const lines = readFileSync(fileName, "utf-8")
   .filter((x) => !!x);
 
 const instructions = lines.shift()?.split("");
-const patterns: string[] = [];
 const patternToLeftRightMap: LeftToRightMapType = {};
 console.log(`Using instruction set ${instructions}`);
 
 const fillDataStructures = (linesNoInstructions: string[]) => {
-  linesNoInstructions.forEach((line) => {
-    const [pattern, leftAndRight] = line.split("=").map((x) => x.trim());
-
-    const leftAndRightNoParenthesis = leftAndRight.replace(/[()]/g, "");
-
+  for (let i = 0; i < linesNoInstructions.length; i++) {
+    const line = linesNoInstructions[i];
+    const trimmedLine = line.trim();
+    const [pattern, leftAndRightNoParenthesis] = trimmedLine
+      .split("=")
+      .map((x) => x.trim());
     const [left, right] = leftAndRightNoParenthesis
+      .replace(/[()]/g, "")
       .split(", ")
       .map((x) => x.trim());
 
-    patterns.push(pattern);
     patternToLeftRightMap[pattern] = { L: left, R: right };
-  });
+  }
 };
 
 fillDataStructures(lines);
 
 const processDataWithInstructions = (
   map: LeftToRightMapType,
-  instructions: string[],
-  patterns: string[]
+  instructions: string[]
 ) => {
   let steps = 0;
-  let currentPattern = patterns[0];
+  let currentPattern = "AAA";
   let indexOnInstructions = 0;
 
   const processCurrentInstruction = () => {
@@ -73,8 +72,7 @@ const processDataWithInstructions = (
 
 const answer = processDataWithInstructions(
   patternToLeftRightMap,
-  instructions as string[],
-  patterns
+  instructions as string[]
 );
 
 console.log(`Answer to part 1: ${answer}`);
