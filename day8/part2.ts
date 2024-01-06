@@ -1,7 +1,6 @@
 import { readFileSync } from "fs";
 
 type LeftToRightMapType = { [key: string]: { L: string; R: string } };
-// type that is l or r
 type InstructionType = "L" | "R";
 
 if (process.argv[2] === undefined) {
@@ -39,11 +38,11 @@ const findStartingNodes = (map: LeftToRightMapType): string[] => {
 const processDataWithInstructions = (
   map: LeftToRightMapType,
   instructions: string[],
-  maxSteps: number = 10000
+  maxSteps: number = 1000000000 // Adjust based on the expected complexity
 ): number => {
   let steps = 0;
   let currentPatterns = findStartingNodes(map);
-  const patternCache = new Map<string, string>(); // Cache for storing pattern results
+  const patternCache = new Map<string, string>();
 
   while (
     !currentPatterns.every((pattern) => pattern.endsWith("Z")) &&
@@ -52,39 +51,29 @@ const processDataWithInstructions = (
     const instruction = instructions[steps % instructions.length];
 
     currentPatterns = currentPatterns.map((pattern) => {
-      // Check if the pattern result is already in the cache
       const cacheKey = `${pattern}-${instruction}`;
-
       if (patternCache.has(cacheKey)) {
         return patternCache.get(cacheKey) as string;
       }
-
-      // Compute and store the result in the cache
       const newPattern = map[pattern][instruction as InstructionType];
       patternCache.set(cacheKey, newPattern);
-      return newPattern as string;
+      return newPattern;
     });
 
     steps++;
-    // Logging every 100 steps for monitoring
-    if (steps % 100 === 0) {
-      console.log(`Step ${steps}, Current Patterns: ${currentPatterns}`);
-    }
+  }
 
-    if (steps >= maxSteps) {
-      console.log("Maximum step limit reached, exiting...");
-      return -1;
-    }
+  if (steps >= maxSteps) {
+    console.log("Maximum step limit reached, exiting...");
+    return -1;
   }
 
   return steps;
 };
 
-// Usage example
 const answer = processDataWithInstructions(
   patternToLeftRightMap,
-  instructions as string[],
-  100000000000000000
+  instructions as string[]
 );
 
 if (answer === -1) {
