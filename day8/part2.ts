@@ -63,9 +63,14 @@ const processDataWithInstructions = (
         );
         return [];
       }
+
       patternCache.set(cacheKey, newPattern);
       return [newPattern];
     });
+
+    if (steps % 100000 === 0) {
+      console.log(`Step ${steps}: ${currentPatterns.join(", ")}`);
+    }
 
     steps++;
   }
