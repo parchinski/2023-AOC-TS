@@ -18,8 +18,10 @@ const patternToLeftRightMap: LeftToRightMapType = {};
 
 const fillDataStructures = (linesNoInstructions: string[]) => {
   linesNoInstructions.forEach((line) => {
-    const [pattern, leftAndRight] = line.split("=").map((x) => x.trim());
-    const [left, right] = leftAndRight
+    const [pattern, leftAndRightNoParenthesis] = line
+      .split("=")
+      .map((x) => x.trim());
+    const [left, right] = leftAndRightNoParenthesis
       .replace(/[()]/g, "")
       .split(", ")
       .map((x) => x.trim());
@@ -46,19 +48,22 @@ const processDataWithInstructions = (
     !currentPatterns.every((pattern) => pattern.endsWith("Z")) &&
     steps < maxSteps
   ) {
-    const instruction = instructions[steps % instructions.length];
+    const instructionIndex = steps % instructions.length;
+    const instruction = instructions[instructionIndex];
 
     currentPatterns = currentPatterns.flatMap((pattern) => {
       const cacheKey = `${pattern}-${instruction}`;
-
       if (patternCache.has(cacheKey)) {
         return [patternCache.get(cacheKey) as string];
       }
-
       const newPattern = map[pattern][instruction as InstructionType];
-
+      if (!newPattern) {
+        console.error(
+          `No mapping found for pattern ${pattern} with instruction ${instruction}`
+        );
+        return [];
+      }
       patternCache.set(cacheKey, newPattern);
-
       return [newPattern];
     });
 
