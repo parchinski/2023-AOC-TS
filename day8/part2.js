@@ -28,9 +28,8 @@ fillDataStructures(lines);
 var findStartingNodes = function (map) {
     return Object.keys(map).filter(function (key) { return key.endsWith("A"); });
 };
-var processDataWithInstructions = function (map, instructions, maxSteps // Adjust based on the expected complexity
-) {
-    if (maxSteps === void 0) { maxSteps = 1000000000; }
+var processDataWithInstructions = function (map, instructions, maxSteps) {
+    if (maxSteps === void 0) { maxSteps = 1000000000000; }
     var steps = 0;
     var currentPatterns = findStartingNodes(map);
     var patternCache = new Map();

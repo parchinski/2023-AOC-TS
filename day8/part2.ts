@@ -38,7 +38,7 @@ const findStartingNodes = (map: LeftToRightMapType): string[] => {
 const processDataWithInstructions = (
   map: LeftToRightMapType,
   instructions: string[],
-  maxSteps: number = 1000000000 // Adjust based on the expected complexity
+  maxSteps: number = 1000000000000
 ): number => {
   let steps = 0;
   let currentPatterns = findStartingNodes(map);
