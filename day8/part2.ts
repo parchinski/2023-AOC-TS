@@ -18,10 +18,8 @@ const patternToLeftRightMap: LeftToRightMapType = {};
 
 const fillDataStructures = (linesNoInstructions: string[]) => {
   linesNoInstructions.forEach((line) => {
-    const [pattern, leftAndRightNoParenthesis] = line
-      .split("=")
-      .map((x) => x.trim());
-    const [left, right] = leftAndRightNoParenthesis
+    const [pattern, leftAndRight] = line.split("=").map((x) => x.trim());
+    const [left, right] = leftAndRight
       .replace(/[()]/g, "")
       .split(", ")
       .map((x) => x.trim());
@@ -50,14 +48,18 @@ const processDataWithInstructions = (
   ) {
     const instruction = instructions[steps % instructions.length];
 
-    currentPatterns = currentPatterns.map((pattern) => {
+    currentPatterns = currentPatterns.flatMap((pattern) => {
       const cacheKey = `${pattern}-${instruction}`;
+
       if (patternCache.has(cacheKey)) {
-        return patternCache.get(cacheKey) as string;
+        return [patternCache.get(cacheKey) as string];
       }
+
       const newPattern = map[pattern][instruction as InstructionType];
+
       patternCache.set(cacheKey, newPattern);
-      return newPattern;
+
+      return [newPattern];
     });
 
     steps++;
