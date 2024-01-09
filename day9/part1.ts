@@ -12,6 +12,7 @@ const input = readFileSync(inputFile, "utf8")
   .filter((x) => !!x);
 
 const result = sumOfAllLines(input);
+console.log(`Answer to part 1: ${result}`);
 
 // Functions
 function sumOfAllLines(input: string[]): number {
@@ -22,15 +23,23 @@ function sumOfAllLines(input: string[]): number {
       .split(" ")
       .map((x) => x.trim())
       .map((x) => parseInt(x));
-    const decendingDifferences: number[][] = findDecendingDifferences(numbers);
-    const nextNumber = findNextNumber(decendingDifferences, numbers);
+    const descendingDifferences: number[][] = findDescendingDifferences(
+      numbers
+    );
+    console.log(descendingDifferences);
+
+    const nextNumber = findNextNumber(
+      descendingDifferences,
+      numbers[numbers.length - 1]
+    );
+
     sum += nextNumber;
   }
 
   return sum;
 }
 
-function findDecendingDifferences(numbers: number[]): number[][] {
+function findDescendingDifferences(numbers: number[]): number[][] {
   const decendingDifferences: number[][] = [];
   let nextDifferences = findNextDifferences(numbers);
 
@@ -39,7 +48,7 @@ function findDecendingDifferences(numbers: number[]): number[][] {
     nextDifferences = findNextDifferences(nextDifferences);
   }
 
-  return decendingDifferences;
+  return decendingDifferences.reverse();
 }
 
 function findNextDifferences(numbers: number[]): number[] {
@@ -58,21 +67,21 @@ function findNextDifferences(numbers: number[]): number[] {
 }
 
 function findNextNumber(
-  decendingDifferences: number[][],
-  numbers: number[]
+  descendingDifferences: number[][],
+  numberToAddTo: number
 ): number {
-  const ascendingDifferences = decendingDifferences.reverse();
-  let increment = 0;
+  let nextNumber = numberToAddTo;
+  console.log(nextNumber);
 
-  for (let i = 0; i < ascendingDifferences.length; i++) {
-    console.log(ascendingDifferences[i]);
-    if (
-      ascendingDifferences[i].every((x) => x === ascendingDifferences[i][0])
-    ) {
-      increment = ascendingDifferences[i][0];
-      return numbers[numbers.length - 1];
+  for (let i = 0; i < descendingDifferences.length; i++) {
+    const currentDifferences = descendingDifferences[i];
+    if (i === 0) {
+      nextNumber += currentDifferences[i];
+    } else {
+      nextNumber += currentDifferences[currentDifferences.length - 1];
     }
   }
 
-  return 0;
+  console.log(nextNumber);
+  return nextNumber;
 }
