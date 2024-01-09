@@ -38,7 +38,7 @@ const findStartingNodes = (map: LeftToRightMapType): string[] => {
 const processDataWithInstructions = (
   map: LeftToRightMapType,
   instructions: string[],
-  maxSteps: number = 1000000000000,
+  maxSteps: number = 1000000000000
 ): number => {
   let steps = 0;
   let currentPatterns = findStartingNodes(map);
@@ -59,7 +59,7 @@ const processDataWithInstructions = (
       const newPattern = map[pattern][instruction as InstructionType];
       if (!newPattern) {
         console.error(
-          `No mapping found for pattern ${pattern} with instruction ${instruction}`,
+          `No mapping found for pattern ${pattern} with instruction ${instruction}`
         );
         return [];
       }
@@ -67,10 +67,6 @@ const processDataWithInstructions = (
       patternCache.set(cacheKey, newPattern);
       return [newPattern];
     });
-
-    if (steps % 1 === 0) {
-      console.log(`Step ${steps}: ${currentPatterns.join(", ")}`);
-    }
 
     steps++;
   }
@@ -85,7 +81,7 @@ const processDataWithInstructions = (
 
 const answer = processDataWithInstructions(
   patternToLeftRightMap,
-  instructions as string[],
+  instructions as string[]
 );
 
 if (answer === -1) {
